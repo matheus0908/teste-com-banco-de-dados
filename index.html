@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Programa de Produtividade</title>
+    <style>
+        body {
+            background-color: #f0f0f0;
+        }
+        header {
+            background-color: black;
+            padding: 20px;
+            text-align: center;
+        }
+        footer {
+            background-color: orange;
+            padding: 10px;
+            text-align: center;
+        }
+        form {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            margin: 20px;
+            padding: 20px;
+        }
+        input {
+            margin: 10px;
+        }
+        .registro {
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Programa de Produtividade</h1>
+        <img src="sua_imagem.jpg" alt="Sua Imagem">
+    </header>
+
+    <form id="registroForm" action="processa_registro.php" method="post">
+        <label for="data">Data:</label>
+        <input type="date" id="data" name="data"><br>
+
+        <label for="nome">Nome do Usuário:</label>
+        <input type="text" id="nome" name="nome"><br>
+
+        <label for="req">Número do Requerimento:</label>
+        <input type="text" id="req" name="req"><br>
+
+        <label for="sei">Número SEI (6099):</label>
+        <input type="text" id="sei" name="sei"><br>
+
+        <label for="folhas">Número de Folhas Digitalizadas:</label>
+        <input type="number" id="folhas" name="folhas"><br>
+
+        <label for="plantas">Número de Plantas Digitalizadas:</label>
+        <input type="number" id="plantas" name="plantas"><br>
+
+        <input type="button" value="Registrar" onclick="registrar()">
+    </form>
+
+    <div id="registros">
+        <h2>Registros:</h2>
+    </div>
+
+    <div id="totalDia">
+        <h2>Total do Dia:</h2>
+        <p>Folhas: <span id="totalFolhas">0</span></p>
+        <p>Plantas: <span id="totalPlantas">0</span></p>
+    </div>
+
+    <form id="buscaForm">
+        <label for="buscaData">Data:</label>
+        <input type="date" id="buscaData" name="buscaData">
+        <label for="buscaNome">Nome do Usuário:</label>
+        <input type="text" id="buscaNome" name="buscaNome">
+        <input type="button" value="Buscar" onclick="buscarRegistros()">
+    </form>
+
+    <footer>
+        <p>Rodapé laranja</p>
+    </footer>
+
+    <script>
+        let registros = [];
+        let totalFolhasDia = 0;
+        let totalPlantasDia = 0;
+
+        function registrar() {
+            const data = document.getElementById("data").value;
+            const nome = document.getElementById("nome").value;
+            const req = document.getElementById("req").value;
+            const sei = document.getElementById("sei").value;
+            const folhas = parseInt(document.getElementById("folhas").value);
+            const plantas = parseInt(document.getElementById("plantas").value);
+
+            registros.push({ data, nome, req, sei, folhas, plantas });
+            totalFolhasDia += folhas;
+            totalPlantasDia += plantas;
+
+            atualizarTotaisDia();
+
+            const registroDiv = document.createElement("div");
+            registroDiv.classList.add("registro");
+            registroDiv.innerHTML = `Nome: ${nome}, Requerimento: ${req}, SEI: ${sei}, Folhas: ${folhas}, Plantas: ${plantas}`;
+            document.getElementById("registros").appendChild(registroDiv);
+            
+            salvarRegistros();
+        }
+
+        function buscarRegistros() {
+            const buscaData = document.getElementById("buscaData").value;
+            const buscaNome = document.getElementById("buscaNome").value;
+
+            const resultados = registros.filter(registro => registro.data === buscaData && registro.nome === buscaNome);
+            let totalFolhasUsuario = 0;
+            let totalPlantasUsuario = 0;
+
+            const resultadoDiv = document.createElement("div");
+            resultadoDiv.innerHTML = "<h2>Resultados da busca:</h2>";
+
+            resultados.forEach(registro => {
+                resultadoDiv.innerHTML += `Nome: ${registro.nome}, Requerimento: ${registro.req}, SEI: ${registro.sei}, Folhas: ${registro.folhas}, Plantas: ${registro.plantas}<br>`;
+                totalFolhasUsuario += registro.folhas;
+                totalPlantasUsuario += registro.plantas;
+            });
+
+            resultadoDiv.innerHTML += `<p>Total Folhas do Usuário: ${totalFolhasUsuario}</p>`;
+            resultadoDiv.innerHTML += `<p>Total Plantas do Usuário: ${totalPlantasUsuario}</p>`;
+
+            document.getElementById("registros").appendChild(resultadoDiv);
+        }
+
+        function atualizarTotaisDia() {
+            document.getElementById("totalFolhas").textContent = totalFolhasDia;
+            document.getElementById("totalPlantas").textContent = totalPlantasDia;
+        }
+
+        function salvarRegistros() {
+            localStorage.setItem('registros', JSON.stringify(registros));
+        }
+
+        function carregarRegistrosSalvos() {
+            const registrosSalvos = localStorage.getItem('registros');
+            if (registrosSalvos) {
+                registros = JSON.parse(registrosSalvos);
+                registros.forEach(registro => {
+                    totalFolhasDia += registro.folhas;
+                    totalPlantasDia += registro.plantas;
+                });
+                atualizarTotaisDia();
+            }
+        }
+
+        carregarRegistrosSalvos();
+    </script>
+</body>
+</html>
